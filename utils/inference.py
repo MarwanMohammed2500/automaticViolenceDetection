@@ -2,14 +2,22 @@ import torch
 
 device = torch.device("cpu")
 
-model = torch.load("model/violence_model.pth", map_location=device)  ## the path of the model
+model = torch.load(
+    "model/violenceDetectionModel.pt",
+    map_location=device
+)
 model.eval()
 
 @torch.no_grad()
-def predict(video_tensor):
-    video_tensor = video_tensor.unsqueeze(0)  # (1, T, C, H, W)
+def predict(video_tensor: torch.Tensor) -> float:
+    """
+    Input shape: (C, T, H, W)
+    Returns: violence probability
+    """
+    video_tensor = video_tensor.unsqueeze(0)  # (1, C, T, H, W)
     output = model(video_tensor)
 
+    # Binary classifier
     if output.shape[-1] == 1:
         prob = torch.sigmoid(output).item()
     else:

@@ -1,7 +1,12 @@
+import torch
 import streamlit as st
 import tempfile
 from utils.video_reader import read_video
-from utils.inference import predict
+from utils.inference import predict, extract_features
+
+# Load feature extractor
+model = torch.jit.load("models/C3D_feature_extractor.pt")
+model.eval()
 
 st.set_page_config(
     page_title="Violence Detection System",
@@ -24,6 +29,7 @@ if uploaded_video:
 
     if st.button("Analyze Video"):
         with st.spinner("Analyzing video..."):
+            # Read video
             video_tensor = read_video(
                 temp_file.name,
                 target_num_frames=16,
@@ -31,11 +37,13 @@ if uploaded_video:
                 normalize=True
             )
 
-            prob = predict(video_tensor)
+            # Extract features
+            features = extract_features(model, video_tensor)
 
-            if prob > 0.5:
+            # Predict
+            label, prob = predict(features)
+
+            if label == 1:
                 st.error(f"🚨 Violence Detected\n\nConfidence: {prob:.2f}")
-                # st.error(f"🚨 Violence Detected")
             else:
                 st.success(f"✅ Non-Violent Activity\n\nConfidence: {1 - prob:.2f}")
-                # st.success(f"✅ Non-Violent Activity")

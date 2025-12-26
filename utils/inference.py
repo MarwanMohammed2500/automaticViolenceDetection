@@ -4,7 +4,7 @@ import numpy as np
 
 device = torch.device("cpu")
 
-clf = joblib.load("models/violence_classifier_svm.joblib")
+clf = joblib.load("../models/violence_classifier_svm.joblib")
 
 @torch.inference_mode()
 def extract_features(model, video_tensor: torch.Tensor) -> np.ndarray:
@@ -35,3 +35,4 @@ def predict(features: np.ndarray):
         prob = float(label)
 
     return label, prob
+
